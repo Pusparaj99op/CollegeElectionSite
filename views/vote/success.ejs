@@ -1,0 +1,50 @@
+<%- contentFor('body') %>
+
+<%#
+  Vote Success Page
+  Purpose: Confirm successful vote submission
+  Version: 1.0.0
+  Last Modified: July 31, 2025
+%>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-lg border-0 text-center">
+        <div class="card-body p-5">
+          <div class="mb-4">
+            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+          </div>
+
+          <h2 class="text-success mb-3">Vote Submitted Successfully!</h2>
+
+          <p class="lead mb-4">
+            Thank you for participating in the election process. Your vote has been recorded securely.
+          </p>
+
+          <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle me-2"></i>Vote Details:</h6>
+            <p class="mb-2"><strong>Election:</strong> <%= election.title %></p>
+            <p class="mb-2"><strong>Your Choice:</strong> <%= candidate.student.name %></p>
+            <p class="mb-0"><strong>Time:</strong> <%= new Date().toLocaleString() %></p>
+          </div>
+
+          <div class="alert alert-warning">
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Important:</h6>
+            <ul class="mb-0 text-start">
+              <li>Your vote is final and cannot be changed</li>
+              <li>Results will be announced after the voting period ends</li>
+              <li>Keep this confirmation for your records</li>
+            </ul>
+          </div>
+
+          <div class="mt-4">
+            <a href="/" class="btn btn-primary btn-lg">
+              <i class="fas fa-home me-2"></i>Return to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

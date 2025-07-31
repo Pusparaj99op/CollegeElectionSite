@@ -1,0 +1,238 @@
+<%#
+  QR Code Management Component
+  Purpose: Allow teachers to generate and manage QR codes for elections
+  Version: 1.0.0
+  Last Modified: July 31, 2025
+%>
+
+<!-- QR Code Management Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrModalLabel">
+          <i class="fas fa-qrcode me-2"></i>QR Code Management
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="qrContent">
+          <!-- Content will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Time Slot Management Modal -->
+<div class="modal fade" id="timeSlotModal" tabindex="-1" aria-labelledby="timeSlotModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="timeSlotModalLabel">
+          <i class="fas fa-clock me-2"></i>Add Voting Time Slot
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="timeSlotForm">
+          <input type="hidden" id="timeSlotElectionId" value="">
+
+          <div class="mb-3">
+            <label for="startTime" class="form-label">Start Time</label>
+            <input type="datetime-local" class="form-control" id="startTime" name="startTime" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="endTime" class="form-label">End Time</label>
+            <input type="datetime-local" class="form-control" id="endTime" name="endTime" required>
+          </div>
+
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Students will only be able to vote during these specific time slots.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="addTimeSlot()">
+          <i class="fas fa-plus me-1"></i>Add Time Slot
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// QR Code Management Functions
+function generateQR(electionId, electionTitle) {
+  document.getElementById('qrModalLabel').innerHTML =
+    '<i class="fas fa-qrcode me-2"></i>QR Code for: ' + electionTitle;
+
+  document.getElementById('qrContent').innerHTML =
+    '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Generating QR Code...</div>';
+
+  // Show modal
+  new bootstrap.Modal(document.getElementById('qrModal')).show();
+
+  // Generate QR code
+  fetch(`/qr/generate/${electionId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('qrContent').innerHTML = `
+        <div class="text-center">
+          <h6>Scan this QR code to vote:</h6>
+          <img src="${data.qrCode}" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+
+          <div class="mb-3">
+            <label class="form-label">Public Voting URL:</label>
+            <div class="input-group">
+              <input type="text" class="form-control" value="${data.votingURL}" id="votingURL" readonly>
+              <button class="btn btn-outline-secondary" type="button" onclick="copyURL()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <button class="btn btn-success w-100" onclick="toggleQR('${electionId}', true)">
+                <i class="fas fa-play me-1"></i>Enable QR Access
+              </button>
+            </div>
+            <div class="col-md-6">
+              <button class="btn btn-warning w-100" onclick="toggleQR('${electionId}', false)">
+                <i class="fas fa-pause me-1"></i>Disable QR Access
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <button class="btn btn-info" onclick="showTimeSlotModal('${electionId}')">
+              <i class="fas fa-clock me-1"></i>Manage Time Slots
+            </button>
+          </div>
+
+          <div class="alert alert-info mt-3">
+            <h6><i class="fas fa-info-circle me-2"></i>Instructions:</h6>
+            <ul class="mb-0 text-start">
+              <li>Share this QR code with your students</li>
+              <li>Students can scan it to access the voting page</li>
+              <li>They will need to enter their roll number to vote</li>
+              <li>Each roll number can vote only once</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    } else {
+      document.getElementById('qrContent').innerHTML =
+        '<div class="alert alert-danger">Error: ' + data.error + '</div>';
+    }
+  })
+  .catch(error => {
+    document.getElementById('qrContent').innerHTML =
+      '<div class="alert alert-danger">Error generating QR code: ' + error.message + '</div>';
+  });
+}
+
+function copyURL() {
+  const urlInput = document.getElementById('votingURL');
+  urlInput.select();
+  urlInput.setSelectionRange(0, 99999);
+  document.execCommand('copy');
+
+  // Show feedback
+  const btn = event.target.closest('button');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+  btn.classList.add('btn-success');
+  btn.classList.remove('btn-outline-secondary');
+
+  setTimeout(() => {
+    btn.innerHTML = originalHTML;
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-outline-secondary');
+  }, 2000);
+}
+
+function toggleQR(electionId, enable) {
+  fetch(`/qr/toggle/${electionId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.qrEnabled ? 'QR access enabled' : 'QR access disabled');
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error: ' + error.message);
+  });
+}
+
+function showTimeSlotModal(electionId) {
+  document.getElementById('timeSlotElectionId').value = electionId;
+
+  // Set default times (next hour and hour after)
+  const now = new Date();
+  const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+  const endTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours
+
+  document.getElementById('startTime').value = startTime.toISOString().slice(0, 16);
+  document.getElementById('endTime').value = endTime.toISOString().slice(0, 16);
+
+  new bootstrap.Modal(document.getElementById('timeSlotModal')).show();
+}
+
+function addTimeSlot() {
+  const electionId = document.getElementById('timeSlotElectionId').value;
+  const startTime = document.getElementById('startTime').value;
+  const endTime = document.getElementById('endTime').value;
+
+  if (!startTime || !endTime) {
+    alert('Please fill in both start and end times');
+    return;
+  }
+
+  if (new Date(startTime) >= new Date(endTime)) {
+    alert('Start time must be before end time');
+    return;
+  }
+
+  fetch(`/qr/timeslot/${electionId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      startTime: startTime,
+      endTime: endTime
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Time slot added successfully');
+      bootstrap.Modal.getInstance(document.getElementById('timeSlotModal')).hide();
+      location.reload(); // Refresh to show updated time slots
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error: ' + error.message);
+  });
+}
+</script>

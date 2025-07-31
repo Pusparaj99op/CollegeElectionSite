@@ -1,0 +1,185 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">Admin Dashboard</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          <a href="/admin/dashboard" class="list-group-item list-group-item-action active">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+          <a href="/admin/users" class="list-group-item list-group-item-action">
+            <i class="fas fa-users me-2"></i> Users
+          </a>
+          <a href="/admin/classes" class="list-group-item list-group-item-action">
+            <i class="fas fa-school me-2"></i> Classes
+          </a>
+          <a href="/admin/elections" class="list-group-item list-group-item-action">
+            <i class="fas fa-vote-yea me-2"></i> Elections
+          </a>
+          <a href="/admin/logs" class="list-group-item list-group-item-action">
+            <i class="fas fa-list-alt me-2"></i> System Logs
+          </a>
+          <a href="/admin/backup" class="list-group-item list-group-item-action">
+            <i class="fas fa-cloud-upload-alt me-2"></i> Backup
+          </a>
+          <a href="/admin/settings" class="list-group-item list-group-item-action">
+            <i class="fas fa-cog me-2"></i> Settings
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Welcome, <%= user.name %></h5>
+          <span class="badge bg-light text-dark">Administrator</span>
+        </div>
+        <div class="card-body">
+          <p>Welcome to the College Election System Admin Panel. Monitor and manage the entire system:</p>
+
+          <div class="row g-4 mt-2">
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-users text-primary fa-3x mb-3"></i>
+                  <h5>Total Users</h5>
+                  <h3 class="text-primary"><%= stats.totalUsers %></h3>
+                  <a href="/admin/users" class="btn btn-sm btn-primary mt-2">Manage Users</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-school text-success fa-3x mb-3"></i>
+                  <h5>Classes</h5>
+                  <h3 class="text-success"><%= stats.totalClasses %></h3>
+                  <a href="/admin/classes" class="btn btn-sm btn-success mt-2">Manage Classes</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-vote-yea text-info fa-3x mb-3"></i>
+                  <h5>Elections</h5>
+                  <h3 class="text-info"><%= stats.totalElections %></h3>
+                  <a href="/admin/elections" class="btn btn-sm btn-info mt-2">View Elections</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-chart-line text-warning fa-3x mb-3"></i>
+                  <h5>Total Votes</h5>
+                  <h3 class="text-warning"><%= stats.totalVotes %></h3>
+                  <small class="text-muted">System-wide</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">System Health</h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Database Connection</span>
+                      <span class="badge bg-success">Online</span>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Email Service</span>
+                      <span class="badge bg-success">Active</span>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Google Drive Backup</span>
+                      <span class="badge bg-warning">Not Configured</span>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Last Backup</span>
+                      <small class="text-muted">Never</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">Recent Activity</h6>
+                  <a href="/admin/logs" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                  <% if (recentLogs && recentLogs.length > 0) { %>
+                    <% recentLogs.forEach(log => { %>
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                          <small class="text-muted"><%= formatDate(log.timestamp) %></small>
+                          <br>
+                          <span class="small"><%= log.action.replace('_', ' ') %></span>
+                        </div>
+                        <span class="badge bg-<%= log.status === 'success' ? 'success' : log.status === 'failure' ? 'danger' : 'secondary' %>">
+                          <%= log.status %>
+                        </span>
+                      </div>
+                    <% }) %>
+                  <% } else { %>
+                    <p class="text-muted small">No recent activity</p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex flex-wrap gap-2">
+                    <a href="/admin/backup/create" class="btn btn-outline-primary">
+                      <i class="fas fa-cloud-upload-alt me-1"></i> Create Backup
+                    </a>
+                    <a href="/admin/users/create" class="btn btn-outline-success">
+                      <i class="fas fa-user-plus me-1"></i> Add User
+                    </a>
+                    <a href="/admin/classes/create" class="btn btn-outline-info">
+                      <i class="fas fa-plus me-1"></i> Add Class
+                    </a>
+                    <a href="/admin/logs" class="btn btn-outline-warning">
+                      <i class="fas fa-list-alt me-1"></i> View Logs
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

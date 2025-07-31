@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Student Dashboard</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          <a href="/student/dashboard" class="list-group-item list-group-item-action active">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+          <a href="/student/elections" class="list-group-item list-group-item-action">
+            <i class="fas fa-vote-yea me-2"></i> Elections
+          </a>
+          <a href="/student/class" class="list-group-item list-group-item-action">
+            <i class="fas fa-users me-2"></i> My Class
+          </a>
+          <a href="/student/profile" class="list-group-item list-group-item-action">
+            <i class="fas fa-user-circle me-2"></i> My Profile
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Welcome, <%= user.name %></h5>
+          <span class="badge bg-light text-dark">Roll: <%= user.rollNumber %></span>
+        </div>
+        <div class="card-body">
+          <p>Welcome to the College Election System. Here's your overview:</p>
+
+          <div class="row g-4 mt-2">
+            <div class="col-md-6">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-calendar-day text-primary fa-3x mb-3"></i>
+                  <h5>Active Elections</h5>
+                  <h3 class="text-primary"><%= activeElections %></h3>
+                  <a href="/student/elections" class="btn btn-sm btn-primary mt-2">View Elections</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                  <h5>Votes Cast</h5>
+                  <h3 class="text-success"><%= votesCount %></h3>
+                  <p class="small text-muted mb-0">Thanks for participating!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <% if (upcomingElections.length > 0) { %>
+            <h5 class="mt-4">Upcoming Elections</h5>
+            <div class="list-group mt-3">
+              <% upcomingElections.forEach(election => { %>
+                <a href="/election/<%= election._id %>" class="list-group-item list-group-item-action">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1"><%= election.title %></h6>
+                    <small>
+                      <span class="badge bg-warning">Starts in
+                        <span class="election-countdown" data-target="<%= election.startDate %>">
+                          <%= getTimeRemaining(election.startDate) %>
+                        </span>
+                      </span>
+                    </small>
+                  </div>
+                  <p class="mb-1"><%= election.description %></p>
+                  <small><i class="fas fa-calendar"></i> <%= formatDate(election.startDate) %> - <%= formatDate(election.endDate) %></small>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+
+          <% if (recentResults.length > 0) { %>
+            <h5 class="mt-4">Recent Results</h5>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Election</th>
+                    <th>Winner</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% recentResults.forEach(result => { %>
+                    <tr>
+                      <td><%= result.title %></td>
+                      <td><%= result.winner.student.name %></td>
+                      <td><%= formatDate(result.endDate) %></td>
+                      <td>
+                        <a href="/election/<%= result._id %>" class="btn btn-sm btn-outline-primary">
+                          View Details
+                        </a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,104 @@
+<%- contentFor('body') %>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Register</h3>
+            </div>
+            <div class="card-body p-4">
+                <form action="/auth/register" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your college email">
+                        <div class="form-text">Please use your college email address ending with <%= process.env.COLLEGE_EMAIL_DOMAIN %>.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password" minlength="8">
+                                <div class="form-text">Password must be at least 8 characters long.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password" minlength="8">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="student" selected>Student</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                    </div>
+
+                    <div id="studentFields">
+                        <div class="mb-3">
+                            <label for="rollNumber" class="form-label">Roll Number</label>
+                            <input type="text" class="form-control" id="rollNumber" name="rollNumber" placeholder="Enter your roll number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="classId" class="form-label">Class</label>
+                            <select class="form-select" id="classId" name="classId">
+                                <option value="">Select your class</option>
+                                <% if (typeof classes !== 'undefined' && classes.length > 0) { %>
+                                    <% classes.forEach(function(cls) { %>
+                                        <option value="<%= cls._id %>"><%= cls.name %> (<%= cls.department %>-<%= cls.year %>-<%= cls.section %>)</option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                    </div>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <p>
+                        Already have an account? <a href="/auth/login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const studentFields = document.getElementById('studentFields');
+
+    // Toggle student fields based on role
+    function toggleStudentFields() {
+        if (roleSelect.value === 'student') {
+            studentFields.style.display = 'block';
+            document.getElementById('rollNumber').setAttribute('required', 'required');
+            document.getElementById('classId').setAttribute('required', 'required');
+        } else {
+            studentFields.style.display = 'none';
+            document.getElementById('rollNumber').removeAttribute('required');
+            document.getElementById('classId').removeAttribute('required');
+        }
+    }
+
+    // Set initial state
+    toggleStudentFields();
+
+    // Add event listener for changes
+    roleSelect.addEventListener('change', toggleStudentFields);
+});
+</script>

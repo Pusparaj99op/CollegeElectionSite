@@ -1,0 +1,168 @@
+<%- contentFor('body') %>
+
+<%#
+  Election List View
+  Purpose: Display a list of all elections
+  Version: 1.0.0
+  Last Modified: July 31, 2025
+%>
+
+<div class="container my-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="mb-3">Elections</h1>
+      <p class="lead">Browse all current and past elections in the college.</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="mb-0">Filter Elections</h5>
+    </div>
+    <div class="card-body">
+      <form action="/election" method="GET" class="row g-3">
+        <!-- Status Filter -->
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="">All Statuses</option>
+            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+            <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+          </select>
+        </div>
+
+        <!-- Type Filter -->
+        <div class="col-md-3">
+          <label class="form-label">Election Type</label>
+          <select name="type" class="form-select">
+            <option value="">All Types</option>
+            <option value="CR" <%= filters.type === 'CR' ? 'selected' : '' %>>Class Representative (CR)</option>
+            <option value="BR" <%= filters.type === 'BR' ? 'selected' : '' %>>Batch Representative (BR)</option>
+            <option value="Other" <%= filters.type === 'Other' ? 'selected' : '' %>>Other</option>
+          </select>
+        </div>
+
+        <!-- Class Filter -->
+        <div class="col-md-4">
+          <label class="form-label">Class</label>
+          <select name="classId" class="form-select">
+            <option value="">All Classes</option>
+            <% if (classes && classes.length > 0) { %>
+              <% classes.forEach(cls => { %>
+                <option value="<%= cls._id %>" <%= filters.classId === cls._id.toString() ? 'selected' : '' %>>
+                  <%= cls.name %> (<%= cls.department %>, Year: <%= cls.year %><%= cls.section ? `, Section: ${cls.section}` : '' %>)
+                </option>
+              <% }) %>
+            <% } %>
+          </select>
+        </div>
+
+        <!-- Filter Button -->
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-filter me-1"></i> Apply Filters
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Elections List -->
+  <% if (elections && elections.length > 0) { %>
+    <div class="row">
+      <% elections.forEach(election => { %>
+        <div class="col-md-6 col-xl-4 mb-4">
+          <div class="card h-100 shadow-sm border-<%= election.status === 'active' ? 'success' : (election.status === 'pending' ? 'warning' : 'secondary') %>">
+            <div class="card-header bg-white">
+              <h5 class="card-title mb-0 text-truncate">
+                <%= election.title %>
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <span class="badge bg-<%= election.status === 'active' ? 'success' : (election.status === 'pending' ? 'warning' : 'secondary') %>">
+                  <%= election.status.charAt(0).toUpperCase() + election.status.slice(1) %>
+                </span>
+                <span class="badge bg-info ms-2"><%= election.electionType %></span>
+              </div>
+
+              <p class="card-text mb-2">
+                <strong>Class:</strong>
+                <% if (election.class) { %>
+                  <%= election.class.name %>
+                  (<%= election.class.department %>, Year: <%= election.class.year %>
+                  <%= election.class.section ? `, Section: ${election.class.section}` : '' %>)
+                <% } else { %>
+                  N/A
+                <% } %>
+              </p>
+
+              <p class="card-text mb-2">
+                <strong>Period:</strong>
+                <%= new Date(election.startDate).toLocaleDateString() %> to
+                <%= new Date(election.endDate).toLocaleDateString() %>
+              </p>
+
+              <p class="card-text mb-2">
+                <strong>Candidates:</strong> <%= election.candidates ? election.candidates.length : 0 %>
+              </p>
+
+              <p class="card-text mb-0">
+                <strong>Total Votes:</strong> <%= election.totalVotes || 0 %>
+              </p>
+            </div>
+            <div class="card-footer bg-white">
+              <a href="/election/<%= election._id %>" class="btn btn-primary w-100">
+                <i class="fas fa-info-circle me-1"></i> View Details
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <nav aria-label="Page navigation" class="my-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+            <a class="page-link" href="/election?page=<%= currentPage - 1 %>&status=<%= filters.status %>&type=<%= filters.type %>&classId=<%= filters.classId %>" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+              <a class="page-link" href="/election?page=<%= i %>&status=<%= filters.status %>&type=<%= filters.type %>&classId=<%= filters.classId %>">
+                <%= i %>
+              </a>
+            </li>
+          <% } %>
+
+          <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+            <a class="page-link" href="/election?page=<%= parseInt(currentPage) + 1 %>&status=<%= filters.status %>&type=<%= filters.type %>&classId=<%= filters.classId %>" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    <% } %>
+  <% } else { %>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i> No elections found matching your criteria. Please try different filters or check back later.
+    </div>
+  <% } %>
+
+  <!-- Help Section -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">Need Help?</h5>
+    </div>
+    <div class="card-body">
+      <p>If you have questions about the election process, please contact your class coordinator or the election administrator.</p>
+      <p class="mb-0">For technical issues with the voting system, please email <a href="mailto:support@college.edu">support@college.edu</a>.</p>
+    </div>
+  </div>
+</div>

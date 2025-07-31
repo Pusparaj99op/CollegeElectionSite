@@ -1,0 +1,161 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">Teacher Dashboard</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          <a href="/teacher/dashboard" class="list-group-item list-group-item-action active">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+          <a href="/teacher/students" class="list-group-item list-group-item-action">
+            <i class="fas fa-user-graduate me-2"></i> Students
+          </a>
+          <a href="/teacher/elections" class="list-group-item list-group-item-action">
+            <i class="fas fa-vote-yea me-2"></i> Elections
+          </a>
+          <a href="/teacher/elections/create" class="list-group-item list-group-item-action">
+            <i class="fas fa-plus-circle me-2"></i> Create Election
+          </a>
+          <a href="/teacher/profile" class="list-group-item list-group-item-action">
+            <i class="fas fa-user-circle me-2"></i> My Profile
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Welcome, <%= user.name %></h5>
+          <span class="badge bg-light text-dark">Class In-charge</span>
+        </div>
+        <div class="card-body">
+          <p>Welcome to the College Election System. Here's your overview:</p>
+
+          <div class="row g-4 mt-2">
+            <div class="col-md-4">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-users text-success fa-3x mb-3"></i>
+                  <h5>Students</h5>
+                  <h3 class="text-success"><%= studentsCount %></h3>
+                  <a href="/teacher/students" class="btn btn-sm btn-success mt-2">Manage Students</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-vote-yea text-primary fa-3x mb-3"></i>
+                  <h5>Elections</h5>
+                  <h3 class="text-primary"><%= electionsCount %></h3>
+                  <a href="/teacher/elections" class="btn btn-sm btn-primary mt-2">View Elections</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card bg-light h-100">
+                <div class="card-body text-center">
+                  <i class="fas fa-user-tie text-info fa-3x mb-3"></i>
+                  <h5>Candidates</h5>
+                  <h3 class="text-info"><%= candidatesCount %></h3>
+                  <a href="/teacher/candidates" class="btn btn-sm btn-info mt-2">View Candidates</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+            <a href="/teacher/elections/create" class="btn btn-success btn-lg">
+              <i class="fas fa-plus-circle me-2"></i> Create New Election
+            </a>
+          </div>
+
+          <% if (pendingCandidates.length > 0) { %>
+            <h5 class="mt-4">Candidates Pending Approval</h5>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Election</th>
+                    <th>Symbol</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% pendingCandidates.forEach(candidate => { %>
+                    <tr>
+                      <td><%= candidate.student.name %></td>
+                      <td><%= candidate.election.title %></td>
+                      <td>
+                        <span class="candidate-symbol" style="background-color: <%= candidate.color %>; font-size: 1rem; width: 30px; height: 30px;">
+                          <i class="fas fa-<%= candidate.symbol %>"></i>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="btn-group">
+                          <form action="/teacher/candidates/<%= candidate._id %>/approve" method="POST">
+                            <button type="submit" class="btn btn-sm btn-success me-2">
+                              <i class="fas fa-check"></i> Approve
+                            </button>
+                          </form>
+                          <form action="/teacher/candidates/<%= candidate._id %>/reject" method="POST">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                              <i class="fas fa-times"></i> Reject
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+
+          <% if (activeElections.length > 0) { %>
+            <h5 class="mt-4">Active Elections</h5>
+            <div class="list-group">
+              <% activeElections.forEach(election => { %>
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1"><%= election.title %></h6>
+                    <small>
+                      <span class="badge bg-success">Active</span>
+                      <span class="badge bg-danger">Ends in
+                        <span class="election-countdown" data-target="<%= election.endDate %>">
+                          <%= getTimeRemaining(election.endDate) %>
+                        </span>
+                      </span>
+                    </small>
+                  </div>
+                  <p class="mb-1"><%= election.description %></p>
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small><i class="fas fa-users"></i> <%= election.votes.length %> votes cast</small>
+                    <div>
+                      <a href="/election/<%= election._id %>" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                      <a href="/teacher/elections/<%= election._id %>/stats" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-chart-bar"></i> Stats
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

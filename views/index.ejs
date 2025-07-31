@@ -1,0 +1,80 @@
+<%- contentFor('body') %>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <h1 class="text-center mb-4">College Election System</h1>
+
+                <div class="text-center mb-5">
+                    <img src="/images/logo.png" alt="College Election Logo" class="img-fluid" style="max-height: 150px;">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-vote-yea fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Easy Voting</h5>
+                                <p class="card-text">Simple and secure voting process for all college elections.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">Secure System</h5>
+                                <p class="card-text">Only verified students with college email IDs can participate.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-info">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-pie fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">Real-time Results</h5>
+                                <p class="card-text">Instant election results with detailed analytics.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <% if (user) { %>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin/dashboard" class="btn btn-primary btn-lg">Go to Admin Dashboard</a>
+                        <% } else if (user.role === 'teacher') { %>
+                            <a href="/teacher/dashboard" class="btn btn-success btn-lg">Go to Teacher Dashboard</a>
+                        <% } else if (user.role === 'student') { %>
+                            <a href="/student/dashboard" class="btn btn-info btn-lg">Go to Student Dashboard</a>
+                        <% } %>
+                    <% } else { %>
+                        <div class="d-flex justify-content-center">
+                            <a href="/auth/login" class="btn btn-primary btn-lg me-3">Login</a>
+                            <a href="/auth/register" class="btn btn-outline-primary btn-lg">Register</a>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/election" class="btn btn-link">View Active Elections</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 border-0 shadow">
+            <div class="card-body p-4">
+                <h3 class="mb-3">Active Elections</h3>
+
+                <div class="list-group">
+                    <!-- This would normally be populated from the database -->
+                    <div class="text-center py-4">
+                        <a href="/election" class="btn btn-outline-secondary">View All Elections</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

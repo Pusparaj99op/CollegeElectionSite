@@ -1,0 +1,256 @@
+<%- contentFor('body') %>
+
+<%#
+  Public Voting Page
+  Purpose: Allow students to vote using QR code link
+  Version: 1.0.0
+  Last Modified: July 31, 2025
+%>
+
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Election Info -->
+      <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0"><i class="fas fa-vote-yea me-2"></i><%= election.title %></h2>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Class:</strong>
+                <%= election.class.name %>
+                (<%= election.class.department %>, Year: <%= election.class.year %>
+                <%= election.class.section ? `, Section: ${election.class.section}` : '' %>)
+              </p>
+              <p><strong>Election Type:</strong>
+                <span class="badge bg-info"><%= election.electionType %></span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Voting Period:</strong><br>
+                <%= new Date(election.startDate).toLocaleString() %><br>
+                to <%= new Date(election.endDate).toLocaleString() %>
+              </p>
+            </div>
+          </div>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <%= election.description %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voting Form -->
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0"><i class="fas fa-ballot-check me-2"></i>Cast Your Vote</h4>
+        </div>
+        <div class="card-body">
+          <form action="/vote/<%= election.qrCode.accessToken %>" method="POST" id="votingForm">
+
+            <!-- Roll Number Input (if required) -->
+            <% if (requireRollNumber) { %>
+              <div class="mb-4">
+                <label for="rollNumber" class="form-label">
+                  <i class="fas fa-id-card me-1"></i>Roll Number <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       class="form-control form-control-lg"
+                       id="rollNumber"
+                       name="rollNumber"
+                       required
+                       placeholder="Enter your roll number"
+                       pattern="[A-Za-z0-9]+"
+                       title="Please enter a valid roll number">
+                <div class="form-text">Enter your college roll number to verify your identity.</div>
+              </div>
+            <% } %>
+
+            <!-- Candidates Selection -->
+            <div class="mb-4">
+              <label class="form-label">
+                <i class="fas fa-users me-1"></i>Select Your Candidate <span class="text-danger">*</span>
+              </label>
+
+              <% if (candidates && candidates.length > 0) { %>
+                <div class="row">
+                  <% candidates.forEach((candidate, index) => { %>
+                    <div class="col-md-6 mb-3">
+                      <div class="card h-100 candidate-card" data-candidate="<%= candidate._id %>">
+                        <div class="card-body text-center">
+                          <div class="form-check">
+                            <input class="form-check-input candidate-radio"
+                                   type="radio"
+                                   name="candidateId"
+                                   value="<%= candidate._id %>"
+                                   id="candidate<%= index %>"
+                                   required>
+                            <label class="form-check-label w-100" for="candidate<%= index %>">
+                              <div class="candidate-info">
+                                <h5 class="card-title mb-2">
+                                  <%= candidate.student.name %>
+                                </h5>
+                                <p class="card-text mb-2">
+                                  <strong>Roll No:</strong> <%= candidate.student.rollNumber %>
+                                </p>
+                                <% if (candidate.manifesto) { %>
+                                  <p class="card-text">
+                                    <small class="text-muted">
+                                      <%= candidate.manifesto.substring(0, 100) %>
+                                      <% if (candidate.manifesto.length > 100) { %>...
+                                        <a href="#" class="read-more" data-bs-toggle="modal" data-bs-target="#manifestoModal<%= index %>">
+                                          Read More
+                                        </a>
+                                      <% } %>
+                                    </small>
+                                  </p>
+                                <% } %>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Manifesto Modal -->
+                    <% if (candidate.manifesto && candidate.manifesto.length > 100) { %>
+                      <div class="modal fade" id="manifestoModal<%= index %>" tabindex="-1">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title"><%= candidate.student.name %>'s Manifesto</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                              <p><%= candidate.manifesto %></p>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% } %>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <div class="alert alert-warning">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  No candidates available for this election.
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Voting Confirmation -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="confirmVote" required>
+                <label class="form-check-label" for="confirmVote">
+                  I confirm that I am eligible to vote in this election and that this is my final choice.
+                  <span class="text-danger">*</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success btn-lg" id="submitVote" disabled>
+                <i class="fas fa-check-circle me-2"></i>Submit My Vote
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Important Notice -->
+      <div class="alert alert-warning mt-4">
+        <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Notice:</h6>
+        <ul class="mb-0">
+          <li>You can vote only once in this election</li>
+          <li>Make sure to select your preferred candidate carefully</li>
+          <li>Your vote is secret and cannot be changed once submitted</li>
+          <li>Do not share this voting link with unauthorized persons</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.candidate-card {
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.candidate-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 8px rgba(0,123,255,.25);
+}
+
+.candidate-card.selected {
+  border-color: #28a745;
+  background-color: #f8fff9;
+}
+
+.candidate-radio {
+  transform: scale(1.2);
+}
+
+.candidate-info {
+  padding: 10px 0;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('votingForm');
+  const submitBtn = document.getElementById('submitVote');
+  const confirmCheckbox = document.getElementById('confirmVote');
+  const candidateCards = document.querySelectorAll('.candidate-card');
+  const candidateRadios = document.querySelectorAll('.candidate-radio');
+
+  // Handle candidate card selection
+  candidateCards.forEach(card => {
+    card.addEventListener('click', function() {
+      const candidateId = this.getAttribute('data-candidate');
+      const radio = this.querySelector('input[type="radio"]');
+      radio.checked = true;
+
+      // Update card styles
+      candidateCards.forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+
+      checkFormValid();
+    });
+  });
+
+  // Handle radio button changes
+  candidateRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      candidateCards.forEach(c => c.classList.remove('selected'));
+      this.closest('.candidate-card').classList.add('selected');
+      checkFormValid();
+    });
+  });
+
+  // Handle confirmation checkbox
+  confirmCheckbox.addEventListener('change', checkFormValid);
+
+  // Check if form is valid
+  function checkFormValid() {
+    const selectedCandidate = document.querySelector('input[name="candidateId"]:checked');
+    const confirmed = confirmCheckbox.checked;
+
+    submitBtn.disabled = !(selectedCandidate && confirmed);
+  }
+
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to submit your vote? This action cannot be undone.')) {
+      e.preventDefault();
+    }
+  });
+});
+</script>

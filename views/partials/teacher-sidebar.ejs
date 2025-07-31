@@ -1,0 +1,29 @@
+<%#
+  Teacher Sidebar Navigation
+  Purpose: Navigation menu for teacher pages
+  Version: 1.0.0
+  Last Modified: July 31, 2025
+%>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-success text-white">
+    <h5 class="mb-0">Teacher Dashboard</h5>
+  </div>
+  <div class="list-group list-group-flush">
+    <a href="/teacher/dashboard" class="list-group-item list-group-item-action <%= currentPath === '/teacher/dashboard' ? 'active' : '' %>">
+      <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+    </a>
+    <a href="/teacher/students" class="list-group-item list-group-item-action <%= currentPath === '/teacher/students' ? 'active' : '' %>">
+      <i class="fas fa-user-graduate me-2"></i> Students
+    </a>
+    <a href="/teacher/elections" class="list-group-item list-group-item-action <%= currentPath === '/teacher/elections' ? 'active' : '' %>">
+      <i class="fas fa-vote-yea me-2"></i> Elections
+    </a>
+    <a href="/teacher/elections/create" class="list-group-item list-group-item-action <%= currentPath === '/teacher/elections/create' ? 'active' : '' %>">
+      <i class="fas fa-plus-circle me-2"></i> Create Election
+    </a>
+    <a href="/teacher/profile" class="list-group-item list-group-item-action <%= currentPath === '/teacher/profile' ? 'active' : '' %>">
+      <i class="fas fa-user-circle me-2"></i> My Profile
+    </a>
+  </div>
+</div>

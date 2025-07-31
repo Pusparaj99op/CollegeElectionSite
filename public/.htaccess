@@ -1,0 +1,78 @@
+# College Election Site .htaccess
+# Purpose: Configure Apache server for proper routing and security
+# Version: 1.0.0
+# Last Modified: July 31, 2025
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Force www prefix if not present
+RewriteCond %{HTTP_HOST} ^anymovie\.shop$ [NC]
+RewriteRule ^(.*)$ https://www.anymovie.shop/$1 [R=301,L]
+
+# Proxy all requests to Node.js application running on port 3000
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# Handle static files directly
+RewriteCond %{REQUEST_URI} ^/public/
+RewriteRule ^public/(.*)$ /$1 [L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Compress text files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>
+
+# Set browser caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType text/html "access plus 1 day"
+</IfModule>
+
+# Protect .env file
+<Files .env>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Protect config files
+<FilesMatch "\.(json|lock|yml|yaml|config.js|config.php)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Allow access to specific JSON files in public directory
+<FilesMatch "^public/.*\.json$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# PHP settings
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300

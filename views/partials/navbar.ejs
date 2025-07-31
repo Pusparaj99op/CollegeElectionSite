@@ -1,0 +1,88 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/images/logo-sm.png" alt="Logo" height="30" class="d-inline-block align-text-top me-2">
+            College Election
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/election">Elections</a>
+                </li>
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <% if (user.role === 'admin') { %>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Admin
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="/admin/users">Users</a></li>
+                                <li><a class="dropdown-item" href="/admin/classes">Classes</a></li>
+                                <li><a class="dropdown-item" href="/admin/elections">Elections</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/admin/logs">System Logs</a></li>
+                                <li><a class="dropdown-item" href="/admin/backup">Backup</a></li>
+                                <li><a class="dropdown-item" href="/admin/settings">Settings</a></li>
+                            </ul>
+                        </li>
+                    <% } else if (user.role === 'teacher') { %>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Teacher
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/teacher/dashboard">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="/teacher/students">Students</a></li>
+                                <li><a class="dropdown-item" href="/teacher/elections">Elections</a></li>
+                                <li><a class="dropdown-item" href="/teacher/elections/create">Create Election</a></li>
+                            </ul>
+                        </li>
+                    <% } else if (user.role === 'student') { %>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Student
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/student/dashboard">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="/student/elections">Elections</a></li>
+                                <li><a class="dropdown-item" href="/student/class">My Class</a></li>
+                            </ul>
+                        </li>
+                    <% } %>
+                <% } %>
+            </ul>
+
+            <ul class="navbar-nav">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> <%= user.name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/<%= user.role %>/profile">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+                        </ul>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/register">Register</a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
