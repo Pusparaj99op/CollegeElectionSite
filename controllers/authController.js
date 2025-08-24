@@ -66,6 +66,7 @@ const login = asyncHandler(async (req, res) => {
 
   // Compare passwords
   const isPasswordValid = await user.comparePassword(password);
+
   if (!isPasswordValid) {
     // Log failed login attempt
     await SystemLog.createLog({

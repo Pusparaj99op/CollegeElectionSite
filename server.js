@@ -1,13 +1,18 @@
 /**
  * College Election Site - Main Server File
  * Purpose: Entry point for the college election web application
- * Version: 1.0.0
- * Last Modified: July 31, 2025
+ * Version: 1.0.1
+ * Last Modified: August 1, 2025
  *
  * How to run:
  * 1. Install dependencies with 'npm install'
  * 2. Create a .env file with required configurations
  * 3. Start the server with 'npm start' or 'npm run dev' for development
+ *
+ * Port conflict resolution:
+ * - The server will automatically resolve port conflicts
+ * - Default port is 3000, fallback to 3001 if needed
+ * - Use PORT environment variable to specify a custom port
  */
 
 // Import required packages
@@ -33,9 +38,14 @@ const qrRoutes = require('./routes/qr');
 // Load environment variables
 dotenv.config();
 
+// Import port manager for handling port conflicts
+const { managePort } = require('./scripts/port-manager');
+
 // Initialize express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+// We'll set the port after port management
+let PORT = process.env.PORT || 3000;
 
 // Load Hostinger configuration if in production
 let hostingerConfig = {};
@@ -157,9 +167,56 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Initialize port management before starting server
+async function startServer() {
+  try {
+    // Ensure we have a free port before starting
+    await managePort();
+    PORT = process.env.PORT || 3000;
+
+    // Start the server with graceful shutdown support
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+
+    // Store the server instance for graceful shutdown
+    app.set('server', server);
+
+    // Handle graceful shutdown for nodemon restarts
+    process.once('SIGUSR2', () => {
+      console.log('Nodemon restart signal received. Gracefully shutting down...');
+      server.close(() => {
+        console.log('Server shut down successfully');
+        process.kill(process.pid, 'SIGUSR2');
+      });
+    });
+
+    // Handle normal termination
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM signal received. Shutting down gracefully...');
+      server.close(() => {
+        console.log('Server shut down successfully');
+        process.exit(0);
+      });
+    });
+
+    // Handle Ctrl+C
+    process.on('SIGINT', () => {
+      console.log('SIGINT signal received. Shutting down gracefully...');
+      server.close(() => {
+        console.log('Server shut down successfully');
+        process.exit(0);
+      });
+    });
+
+    return server;
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+}
+
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+startServer();
 
 module.exports = app;

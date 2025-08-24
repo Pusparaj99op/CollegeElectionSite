@@ -2,6 +2,26 @@
 
 A comprehensive web-based voting platform for college elections developed by Pranay Gajbhiye.
 
+
+All users have been updated successfully!
+
+Login credentials:
+---------------------
+Admin:
+- Email: pranaykgajbhiye.cse24f@kdkce.edu.in
+- Password: Pranay@College2025
+
+Teacher:
+- Email: teacher@kdkce.edu.in
+- Password: Teacher@2025
+
+Student:
+- Email: student01@kdkce.edu.in
+- Password: Student@2025
+---------------------
+Disconnected from MongoDB
+
+
 ## Features
 
 - **User Authentication**: Separate login for students, teachers, and administrators
